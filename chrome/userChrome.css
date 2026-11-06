@@ -1,0 +1,828 @@
+/* ==========================================================================
+   Stillfox: a quiet Firefox, inspired by Linear and Apple Notes.
+   Built and tested for Firefox 159, with tabs on the left or on top.
+
+   Colour comes from whatever the theme or Adaptive Tab Bar Colour provides.
+   Every surface here is a mix of the current text colour, so nothing is
+   hard-coded and the whole frame follows the site you are on.
+
+   Inter is by The Inter Project Authors, under the SIL Open Font License 1.1.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* The few numbers worth changing */
+  --sf-sidebar-width: 232px;
+  --sf-row: 30px;
+  --sf-radius: 7px;
+  --sf-card-radius: 10px;
+  --sf-gap: 8px;
+  --sf-toolbar: 44px;
+  --sf-field: 30px;
+  --sf-font-size: 13px;
+  --sf-url-max: 680px;
+  --sf-url-focus: 880px;
+
+  /* How many buttons sit left of the address bar, so it can line up with
+     the page. Change this if you move buttons there in Customize Toolbar. */
+  --sf-left-buttons: 4;
+
+  /* Mixed from the text colour, so they work on any site colour */
+  --sf-line: color-mix(in srgb, currentColor 13%, transparent);
+  --sf-soft: color-mix(in srgb, currentColor 6%, transparent);
+  --sf-hover: color-mix(in srgb, currentColor 8%, transparent);
+  --sf-selected: color-mix(in srgb, currentColor 11%, transparent);
+  --sf-muted: color-mix(in srgb, currentColor 68%, transparent);
+
+  font-family: "Inter", "Segoe UI", sans-serif !important;
+
+  /* Firefox's own shape settings */
+  --toolbarbutton-border-radius: var(--sf-radius) !important;
+  --tab-border-radius: var(--sf-radius) !important;
+  --tab-min-height: var(--sf-row) !important;
+  --tab-margin-block: 0.5px !important;
+  --toolbarbutton-padding-inner: 7px !important;
+  --toolbarbutton-padding-outer: 1px !important;
+
+  /* The tab list's scrollbar only appears while you are over the list */
+  --tab-vertical-scrollbar-color: transparent transparent !important;
+}
+
+:root:has(#vertical-tabs:hover) {
+  --tab-vertical-scrollbar-color: var(--sf-line) transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   Frame: the top row and the tab list read as one surface
+   -------------------------------------------------------------------------- */
+
+#navigator-toolbox {
+  border-bottom: 0 !important;
+  font-size: var(--sf-font-size) !important;
+}
+
+#nav-bar {
+  min-height: var(--sf-toolbar) !important;
+  padding-inline-start: 1px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* With a site colour active, one colour runs behind the top row and the list */
+:root[lwtheme] {
+  --tabpanel-background-color: var(--toolbox-background-color) !important;
+  --sidebar-background-color: var(--toolbox-background-color) !important;
+}
+
+:root[lwtheme] :is(#browser, #sidebar-container, #sidebar-main) {
+  background: var(--toolbox-background-color) !important;
+}
+
+/* The tab list button doesn't stay highlighted while the list is open */
+#sidebar-button:not(:hover) > .toolbarbutton-icon,
+#sidebar-button:not(:hover) > .toolbarbutton-badge-stack {
+  background: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   Address bar: starts where the page starts, soft fill, no outline
+   -------------------------------------------------------------------------- */
+
+#urlbar {
+  --urlbar-height: var(--sf-field) !important;
+  --urlbar-background-border-radius: 8px !important;
+  --urlbar-border-radius: 8px !important;
+  --urlbarview-border-radius: 12px !important;
+}
+
+/* The address bar stays on the left, and everything after it goes to the far
+   right, however wide the window is. It grows a little while you use it. */
+#urlbar-container {
+  max-width: var(--sf-url-max) !important;
+  margin-inline-end: auto !important;
+}
+
+#urlbar-container:has(#urlbar[focused]) {
+  max-width: var(--sf-url-focus) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #urlbar-container {
+    transition: max-width 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+#urlbar:not([focused], [open], [popover-open]) > .urlbar-background {
+  background: var(--sf-soft) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#urlbar:not([focused], [open], [popover-open]):hover > .urlbar-background {
+  background: var(--sf-hover) !important;
+}
+
+#urlbar-input,
+.urlbar-input {
+  font-size: var(--sf-font-size) !important;
+}
+
+/* The bookmark star waits until you are over the address bar */
+#urlbar:not(:hover, [focused]) #star-button-box:not(:has(#star-button[starred])) {
+  opacity: 0 !important;
+}
+
+/* Hold the address bar on the page's left edge */
+#nav-bar-customization-target > toolbarspring:has(~ #urlbar-container) {
+  display: none !important;
+}
+
+#urlbar-container {
+  margin-inline-start: max(4px, calc(var(--sf-sidebar-width) - 6px - var(--sf-left-buttons) * 32px)) !important;
+}
+
+:root:has(sidebar-main:not([expanded])) #urlbar-container {
+  margin-inline-start: 4px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Page: an inset card with no outline, so it melts into the frame
+   -------------------------------------------------------------------------- */
+
+#tabbrowser-tabbox {
+  margin: 0 var(--sf-gap) var(--sf-gap) 0 !important;
+  border-radius: var(--sf-card-radius) !important;
+  overflow: clip !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Side panels such as History or AllDebrid sit on the same kind of card */
+#sidebar-box:not([hidden]) {
+  margin: 0 var(--sf-gap) var(--sf-gap) 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: var(--sf-card-radius) !important;
+  overflow: clip !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Fullscreen video and F11 use the whole screen, with no card edge */
+:root:is([inDOMFullscreen], [inFullscreen]) #tabbrowser-tabbox {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Tab list
+   -------------------------------------------------------------------------- */
+
+sidebar-main {
+  --sidebar-expanded-launcher-width: var(--sf-sidebar-width);
+  font-size: var(--sf-font-size) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] {
+  --tab-min-height: var(--sf-row) !important;
+  --tab-margin-block: 0.5px !important;
+  row-gap: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
+  padding-block: 0 !important;
+  min-height: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-background {
+  margin-block: 0.5px !important;
+  border-radius: var(--sf-radius) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:hover .tab-background:not([selected]) {
+  background: var(--sf-hover) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-background[selected] {
+  background: var(--sf-selected) !important;
+}
+
+.tabbrowser-tab .tab-label {
+  font-size: var(--sf-font-size) !important;
+}
+
+.tabbrowser-tab:not([selected]):not(:hover) .tab-label {
+  color: var(--sf-muted) !important;
+}
+
+.tabbrowser-tab[selected] .tab-label {
+  font-weight: 500 !important;
+}
+
+/* The close button only shows on the row you are over */
+#tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:not(:hover) .tab-close-button {
+  display: none !important;
+}
+
+#vertical-tabs-newtab-button,
+#tabs-newtab-button {
+  color: var(--sf-muted) !important;
+}
+
+/* Pinned tabs: ordinary named rows at the top of the list.
+   No icon tiles and no divider. */
+
+#tabbrowser-tabs[expanded] #pinned-tabs-container[orient="vertical"] {
+  --tab-pinned-min-width: 100% !important;
+  --tab-pinned-min-width-expanded: 100% !important;
+  --tab-height-with-margin-padding: calc(var(--sf-row) + 1px) !important;
+  --tab-margin-inline-pinned-expanded: 0px !important;
+  --tab-container-margin-inline-pinned-expanded: var(--sf-gap) !important;
+}
+
+#tabbrowser-tabs[expanded] #pinned-tabs-container .tab-content {
+  justify-content: flex-start !important;
+  padding-inline: 8px !important;
+}
+
+#tabbrowser-tabs[expanded] #pinned-tabs-container .tab-label-container {
+  display: flex !important;
+  width: auto !important;
+}
+
+#tabbrowser-tabs[expanded] #pinned-tabs-container .tab-icon-stack {
+  margin-inline-end: 8px !important;
+}
+
+#vertical-pinned-tabs-splitter {
+  display: none !important;
+}
+
+/* Tab groups: an arrow, a dot and plain text, so any site colour stays readable */
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label-container {
+  height: 28px !important;
+  min-height: 0 !important;
+  margin-block-start: 6px !important;
+  padding: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label-hover-highlight {
+  width: 100% !important;
+  height: 28px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: var(--sf-radius) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 28px !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 8px !important;
+  border-radius: var(--sf-radius) !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--sf-muted) !important;
+  font-size: var(--sf-font-size) !important;
+  font-weight: 500 !important;
+  line-height: 28px !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label:hover {
+  background: var(--sf-hover) !important;
+  color: inherit !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label::before {
+  content: "";
+  order: -2;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3.5 10.5 8 6 12.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  transform: rotate(90deg);
+  transition: transform 120ms ease;
+}
+
+#tabbrowser-tabs[orient="vertical"] tab-group[collapsed] .tab-group-label::before {
+  transform: none;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label::after {
+  content: "";
+  order: -1;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tab-group-color);
+}
+
+/* In the collapsed icon rail, a group is just its dot */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-group-label {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-group-label::before {
+  display: none;
+}
+
+.tab-group-overflow-count {
+  font-size: 12px !important;
+}
+
+/* The list holds tabs and nothing else. History, Bookmarks, Passwords and
+   Settings all live in the menu at the top right. */
+
+.buttons-wrapper,
+#sidebar-tools-and-extensions-splitter,
+#tabbrowser-tabs[orient="vertical"]::after {
+  display: none !important;
+}
+
+#vertical-tabs {
+  padding-block-end: var(--sf-gap) !important;
+}
+
+/* That row was also what gave the collapsed list its width, so set it here */
+sidebar-main:not([expanded]) {
+  min-width: var(--tab-collapsed-width, 46px) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Extensions: grey until you hover, whichever ones you pin
+   -------------------------------------------------------------------------- */
+
+.webextension-browser-action .toolbarbutton-icon,
+.webextension-browser-action .toolbarbutton-badge-stack,
+.unified-extensions-item-icon {
+  filter: grayscale(1) opacity(0.72) !important;
+  transition: filter 150ms ease;
+}
+
+/* On dark sites, lift the grey so icons stay visible */
+:root[lwt-toolbar="dark"] :is(.webextension-browser-action .toolbarbutton-icon,
+  .webextension-browser-action .toolbarbutton-badge-stack,
+  .unified-extensions-item-icon) {
+  filter: grayscale(1) brightness(1.7) opacity(0.82) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([lwtheme]) :is(.webextension-browser-action .toolbarbutton-icon,
+    .webextension-browser-action .toolbarbutton-badge-stack,
+    .unified-extensions-item-icon) {
+    filter: grayscale(1) brightness(1.7) opacity(0.82) !important;
+  }
+}
+
+:root .webextension-browser-action:hover .toolbarbutton-icon,
+:root .webextension-browser-action:hover .toolbarbutton-badge-stack,
+:root .unified-extensions-item:hover .unified-extensions-item-icon {
+  filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Address bar results: the selected row is a soft fill, not a loud colour
+   -------------------------------------------------------------------------- */
+
+.urlbar,
+.urlbarView {
+  --urlbarview-background-color-selected: var(--sf-selected) !important;
+  --urlbarview-text-color-selected: currentColor !important;
+  --urlbarview-background-color-hover: var(--sf-hover) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Panels: Downloads, Extensions, the app menu and right-click menus
+   -------------------------------------------------------------------------- */
+
+panel,
+menupopup {
+  --panel-border-radius: 12px !important;
+  --panel-border-color: var(--sf-line) !important;
+  --panel-menuitem-border-radius: var(--sf-radius) !important;
+  font-size: var(--sf-font-size);
+}
+
+.panel-header {
+  justify-content: flex-start !important;
+}
+
+.panel-header > h1 {
+  flex: 1 !important;
+  margin-inline: 6px !important;
+  text-align: start !important;
+  font-size: var(--sf-font-size) !important;
+  font-weight: 600 !important;
+}
+
+/* Extensions: one line per extension. A warning still shows when one needs you. */
+#unified-extensions-panel {
+  --uei-icon-size: 20px !important;
+}
+
+.unified-extensions-item:not([attention]) .unified-extensions-item-message-deck {
+  display: none !important;
+}
+
+.unified-extensions-item-name {
+  font-size: var(--sf-font-size) !important;
+  font-weight: 400 !important;
+}
+
+/* Downloads */
+#downloadsListBox > richlistitem {
+  border-radius: var(--sf-radius) !important;
+  margin-block-end: 2px !important;
+}
+
+#downloadsListBox .downloadTypeIcon {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.downloadDetails {
+  color: var(--sf-muted) !important;
+  font-size: 12px !important;
+  opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Hover mode, switched by the Userchrome Toggle button.
+   The list stays a thin rail of icons and slides open over the page when you
+   point at it. Turn the button off to go back to the normal list.
+   -------------------------------------------------------------------------- */
+
+:root[titlepreface*="\180E"] {
+  --sf-rail: 52px;
+}
+
+:root[titlepreface*="\180E"] #sidebar-container {
+  position: relative !important;
+  z-index: 10 !important;
+  width: var(--sf-rail) !important;
+  min-width: var(--sf-rail) !important;
+  overflow: visible !important;
+}
+
+:root[titlepreface*="\180E"] #sidebar-launcher-splitter {
+  display: none !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main {
+  position: absolute !important;
+  inset-block: 0 !important;
+  inset-inline-start: 0 !important;
+  width: var(--sf-rail) !important;
+  overflow: hidden !important;
+  background: var(--toolbox-background-color) !important;
+  border-start-end-radius: var(--sf-card-radius);
+  border-end-end-radius: var(--sf-card-radius);
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover {
+  width: var(--sf-sidebar-width) !important;
+  box-shadow: 6px 0 24px rgba(0, 0, 0, 0.18);
+}
+
+/* In the rail the selected row is a small square, not a cut-off bar */
+:root[titlepreface*="\180E"] sidebar-main:not(:hover) .tab-background {
+  max-width: 30px !important;
+}
+
+/* Hover mode works the same if the list was collapsed with the top-left button.
+   Firefox strips names from collapsed rows, so they are put back while open. */
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-background {
+  width: auto !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-content {
+  justify-content: flex-start !important;
+  padding-inline: calc(var(--tab-margin-inline-inner) + 8px) 8px !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-icon-stack {
+  margin-inline-end: var(--tab-icon-margin-inline-end) !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group > .tabbrowser-tab {
+  margin-inline-start: var(--tab-margin-inline-inner) !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group > .tabbrowser-tab,
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group > .tabbrowser-tab .tab-stack,
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group > .tabbrowser-tab .tab-background {
+  overflow: visible !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group .tab-group-line {
+  display: block !important;
+  inset-inline-start: calc(var(--tab-margin-inline-inner) * -1) !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-group > .tab-group-label-container::after {
+  display: none !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-label-container {
+  display: flex !important;
+  flex: 1 !important;
+  width: auto !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-close-button {
+  position: static !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 4px !important;
+  margin-inline-end: 4px !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) #vertical-tabs-newtab-button,
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) #tabs-newtab-button {
+  width: auto !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .toolbarbutton-text {
+  display: flex !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-group-label {
+  justify-content: flex-start !important;
+  width: calc(100% - 2 * var(--tab-margin-inline-inner)) !important;
+  max-width: none !important;
+  margin-inline-start: var(--tab-margin-inline-inner) !important;
+  padding: 0 8px !important;
+  font-size-adjust: none !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-group-label::before {
+  display: block;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs:not([expanded]) #pinned-tabs-container[orient="vertical"] {
+  --tab-pinned-min-width: 100% !important;
+  --tab-height-with-margin-padding: calc(var(--sf-row) + 1px) !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:hover #tabbrowser-tabs:not([expanded]) #pinned-tabs-container .tabbrowser-tab {
+  width: auto !important;
+}
+
+/* Tab names wait until the rail opens, so no letters peek out at the edge */
+:root[titlepreface*="\180E"] sidebar-main:not(:hover) .tab-label-container,
+:root[titlepreface*="\180E"] sidebar-main:not(:hover) .tab-close-button,
+:root[titlepreface*="\180E"] sidebar-main:not(:hover) #tabbrowser-tabs .toolbarbutton-text {
+  opacity: 0 !important;
+}
+
+:root[titlepreface*="\180E"] sidebar-main:not(:hover) #tabbrowser-tabs[orient="vertical"] .tab-group-label {
+  width: 36px !important;
+  overflow: hidden !important;
+}
+
+/* The address bar moves over to sit beside the rail */
+:root[titlepreface*="\180E"] #urlbar-container {
+  margin-inline-start: 4px !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[titlepreface*="\180E"] sidebar-main {
+    transition: width 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tabs on top. Switch by right-clicking the toolbar and choosing the vertical
+   tabs option. These rules only apply while tabs are across the top.
+   -------------------------------------------------------------------------- */
+
+/* The left column isn't needed: no strip beside the page, and the address bar
+   goes back beside the navigation buttons */
+:root:has(#tabbrowser-tabs[orient="horizontal"]) :is(#sidebar-container, #sidebar-launcher-splitter) {
+  display: none !important;
+}
+
+:root:has(#tabbrowser-tabs[orient="horizontal"]) #tabbrowser-tabbox {
+  margin-inline-start: var(--sf-gap) !important;
+}
+
+:root:has(#tabbrowser-tabs[orient="horizontal"]) #sidebar-box:not([hidden]) {
+  margin-inline-start: var(--sf-gap) !important;
+}
+
+:root:has(#tabbrowser-tabs[orient="horizontal"]) #urlbar-container {
+  margin-inline-start: 4px !important;
+}
+
+/* Hover mode only applies to the left list */
+:root:has(#tabbrowser-tabs[orient="horizontal"]) #userchrome-toggle_joolee_nl-browser-action {
+  display: none !important;
+}
+
+#TabsToolbar {
+  min-height: 38px !important;
+  padding-inline-start: 4px !important;
+}
+
+#TabsToolbar .titlebar-spacer[type="pre-tabs"] {
+  display: none !important;
+}
+
+/* No thin dividers at either end of the tab row */
+:root {
+  --tabstrip-inner-border: 1px solid transparent !important;
+}
+
+spacer:is([part~="overflow-start-indicator"], [part~="overflow-end-indicator"]) {
+  border-color: transparent !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] {
+  --tab-min-height: var(--sf-row) !important;
+  --tab-block-margin: 4px !important;
+  --tab-group-label-size: var(--sf-row) !important;
+  border-inline-start: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-background {
+  margin-block: 4px !important;
+  border-radius: var(--sf-radius) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:hover .tab-background:not([selected]) {
+  background: var(--sf-hover) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-background[selected] {
+  background: var(--sf-selected) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not(:hover) .tab-close-button {
+  display: none !important;
+}
+
+/* Tab groups on top: a dot and plain text, the same as on the left */
+#tabbrowser-tabs[orient="horizontal"] .tab-group-label-hover-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-group-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: var(--sf-row) !important;
+  min-height: 0 !important;
+  padding: 0 8px !important;
+  border-radius: var(--sf-radius) !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--sf-muted) !important;
+  font-size: var(--sf-font-size) !important;
+  font-weight: 500 !important;
+  line-height: var(--sf-row) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-group-label:hover {
+  background: var(--sf-hover) !important;
+  color: inherit !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-group-label::after {
+  content: "";
+  order: -1;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tab-group-color);
+}
+
+/* --------------------------------------------------------------------------
+   Window buttons: the same colour as the other icons, with a soft rounded fill
+   on hover and red only for close. The clickable area stays full height, so
+   the screen corner still closes a maximised window.
+   -------------------------------------------------------------------------- */
+
+@media not (prefers-contrast) {
+  .titlebar-buttonbox {
+    padding-inline-end: 4px !important;
+  }
+
+  .titlebar-button {
+    padding: 0 1px !important;
+    align-items: center !important;
+    background: transparent !important;
+    color: var(--toolbarbutton-icon-fill, currentColor) !important;
+  }
+
+  .titlebar-button:hover,
+  .titlebar-button:hover:active {
+    background: transparent !important;
+  }
+
+  .titlebar-button::before {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--sf-radius);
+  }
+
+  .titlebar-button:hover::before {
+    background: var(--sf-hover);
+  }
+
+  .titlebar-button:hover:active::before {
+    background: var(--sf-selected);
+  }
+
+  .titlebar-close:hover {
+    color: #fff !important;
+  }
+
+  .titlebar-close:hover::before {
+    background: #C42B1C;
+  }
+
+  .titlebar-close:hover:active::before {
+    background: #A62316;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Icons for the two buttons. They are masks painted in the toolbar's icon
+   colour, so they match the other icons on light and dark sites.
+   Moon means "you're in light mode", sun means "you're in dark mode".
+   -------------------------------------------------------------------------- */
+
+:root {
+  --sf-icon-moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.6 9.8A5.9 5.9 0 1 1 6.2 2.4a4.7 4.7 0 0 0 7.4 7.4z' fill='none' stroke='%23000' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --sf-icon-sun: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3Cpath d='M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9'/%3E%3C/svg%3E");
+  --sf-icon-hover: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 13.5H3A1.5 1.5 0 0 1 1.5 12V4A1.5 1.5 0 0 1 3 2.5h10A1.5 1.5 0 0 1 14.5 4v2.5M6 2.5v11'/%3E%3Cpath d='m8.5 8 6 2.2-2.6 1.1-1.1 2.6z' fill='%23000'/%3E%3C/svg%3E");
+  --sf-theme-icon: var(--sf-icon-moon);
+}
+
+:root[lwt-toolbar="dark"] {
+  --sf-theme-icon: var(--sf-icon-sun);
+}
+
+#_2596ab67-da42-4d06-beb3-7777549b56f2_-browser-action .toolbarbutton-icon,
+#userchrome-toggle_joolee_nl-browser-action .toolbarbutton-icon {
+  list-style-image: none !important;
+  background: var(--toolbarbutton-icon-fill, currentColor) !important;
+  background-clip: content-box !important;
+  mask: var(--sf-theme-icon) center / 16px 16px no-repeat content-box !important;
+  filter: none !important;
+}
+
+#userchrome-toggle_joolee_nl-browser-action .toolbarbutton-icon {
+  mask-image: var(--sf-icon-hover) !important;
+}
+
+:root[titlepreface*="\180E"] #userchrome-toggle_joolee_nl-browser-action .toolbarbutton-badge-stack {
+  background: var(--sf-selected) !important;
+  border-radius: var(--sf-radius) !important;
+}
+
+#_2596ab67-da42-4d06-beb3-7777549b56f2_-browser-action .toolbarbutton-badge,
+#userchrome-toggle_joolee_nl-browser-action .toolbarbutton-badge {
+  display: none !important;
+}
